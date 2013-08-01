@@ -4,9 +4,9 @@
  * @module wsc
  */
 var wsc = {};
-wsc.VERSION = '1.7.43';
+wsc.VERSION = '1.7.44';
 wsc.STATE = 'release candidate';
-wsc.REVISION = '0.21.128';
+wsc.REVISION = '0.21.129';
 wsc.defaults = {};
 wsc.defaults.theme = 'wsct_dark';
 wsc.defaults.themes = [ 'wsct_dAmn', 'wsct_dark' ];
@@ -4367,7 +4367,7 @@ wsc.Client.prototype.disconnect = function(  ) {
  */
 var Chatterbox = {};
 
-Chatterbox.VERSION = '0.19.99';
+Chatterbox.VERSION = '0.19.101';
 Chatterbox.STATE = 'beta';
 
 /**
@@ -4488,7 +4488,7 @@ Chatterbox.UI = function( client, view, options, mozilla, events ) {
         unmute: function(  ) { ui.sound.toggle( false ); },
     };
     
-    view.extend( this.settings, options );
+    this.settings = view.extend( this.settings, options );
     view.append('<div class="wsc '+this.settings['theme']+'"></div>');
     
     this.mw = new wsc.Middleware();
@@ -6445,6 +6445,14 @@ Chatterbox.Channel.prototype.pkt_recv_msg = function( event, client ) {
     }, event );
 
 };
+/**
+ * Handle a recv_action packet.
+ * @method pkt_recv_action
+ * @param event {Object} Event data
+ * @param client {Object} Reference to the client
+ */
+// do the exact same thing as above
+Chatterbox.Channel.prototype.pkt_recv_action = Chatterbox.Channel.prototype.pkt_recv_msg;
 
 /**
  * Handle a property packet.
@@ -6679,6 +6687,9 @@ Chatterbox.Chatbook.prototype.toggle_channel = function( ns ) {
  */
 Chatterbox.Chatbook.prototype.remove_channel = function( ns ) {
     var chan = this.channel(ns);
+    
+    if( !chan )
+        return;
     
     if( this.channels() == 0 && !chan.hidden ) 
         return;
