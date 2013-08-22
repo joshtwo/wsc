@@ -5,8 +5,10 @@
  */
 var Chatterbox = {};
 
-Chatterbox.VERSION = '0.19.101';
+Chatterbox.VERSION = '0.19.103';
 Chatterbox.STATE = 'beta';
+
+Chatterbox._gum = function(  ) {};
 
 /**
  * This object is the platform for the wsc UI. Everything can be used and
@@ -154,6 +156,32 @@ Chatterbox.UI = function( client, view, options, mozilla, events ) {
         }
         return scrollbarWidth;
     } ) ();
+    
+    // Get user media methods.
+
+    if( window.mozRTCPeerConnection ) {
+        Chatterbox._gum = function( options, success, error ) {
+    
+            return navigator.mozGetUserMedia( options, success, error );
+    
+        };
+    }
+
+    if( window.webkitRTCPeerConnection ) {
+        Chatterbox._gum = function( options, success, error ) {
+    
+            return navigator.webkitGetUserMedia( options, success, error );
+    
+        };
+    }
+
+    if( window.RTCPeerConnection ) {
+        Chatterbox._gum = function( options, success, error ) {
+    
+            return navigator.getUserMedia( options, success, error );
+    
+        };
+    }
     
     this.LIB = 'Chatterbox';
     this.VERSION = Chatterbox.VERSION;
@@ -342,6 +370,21 @@ Chatterbox.UI.prototype.clock = function( mode ) {
     return this.settings.clock;
 
 };
+
+
+/**
+ * Get user media streams.
+ * @method get_user_media
+ * @param options {Object} Options for the media streams
+ * @param [success] {Function}  Callback fired when media streams have been retrieved
+ * @param [error] {Function} Callback fired when an error occurs
+ */
+Chatterbox.UI.prototype.get_user_media = function( options, success, error ) {
+
+    return Chatterbox._gum( options, success, error );
+
+};
+
 
 /**
  * Build the GUI.
@@ -1595,7 +1638,7 @@ Chatterbox.Channel.prototype.get_header = function( head ) {
  */
 Chatterbox.Channel.prototype.build_user_list = function( names, order ) {
     
-    var uld = this.el.m.find('div.chatusers');
+    var uld = this.el.u;
     var pc = '';
     var pcel = null;
     
@@ -1617,7 +1660,7 @@ Chatterbox.Channel.prototype.build_user_list = function( names, order ) {
  */
 Chatterbox.Channel.prototype.reveal_user_list = function(  ) {
 
-    var uld = this.el.m.find('div.chatusers');
+    var uld = this.el.u;
     var total = 0;
     var count = 0;
     var pc = null;
@@ -1649,7 +1692,7 @@ Chatterbox.Channel.prototype.set_user_list = function( users ) {
     if( Object.size(users) == 0 )
         return;
     
-    var uld = this.el.m.find('div.chatusers');
+    var uld = this.el.u;
     var user = null;
     
     for( var index in users ) {
@@ -1672,7 +1715,7 @@ Chatterbox.Channel.prototype.set_user_list = function( users ) {
  */
 Chatterbox.Channel.prototype.set_user = function( user, noreveal ) {
 
-    var uld = this.el.m.find( 'div.chatusers div.pc#' + replaceAll( user.pc, ' ', '-' ) );
+    var uld = this.el.u.find( 'div.pc#' + replaceAll( user.pc, ' ', '-' ) );
     var ull = uld.find('ul');
     var conn = user.conn == 1 ? '' : '[' + user.conn + ']';
     var html = '<li><a target="_blank" id="' + user.name + '" href="http://' + user.name + '.' + this.manager.settings['domain'] + '"><em>' + user.symbol + '</em>' + user.name + '</a>' + conn + '</li>';
@@ -1727,7 +1770,7 @@ Chatterbox.Channel.prototype.set_user = function( user, noreveal ) {
 Chatterbox.Channel.prototype.remove_user = function( user, noreveal ) {
 
     this.el
-        .m.find('div.chatusers div.pc ul li a#' + user)
+        .u.find('div.pc ul li a#' + user)
         .parent().remove();
     
     noreveal = noreveal || false;
@@ -1823,7 +1866,7 @@ Chatterbox.Channel.prototype.highlight = function( message ) {
         var tab = c.el.t.o;
         var message = data.message;
         
-        if( message !== false ) {
+        if( message !== false && c.namespace[0] != '@' ) {
             ( message || c.el.l.w.find('.logmsg').last() ).addClass('highlight');
         }
         
@@ -5737,7 +5780,7 @@ Chatterbox.template.tab = '<li id="{selector}-tab"><a href="#{selector}" class="
  * @property basetab
  * @type String
  */
-Chatterbox.template.basetab = '<div class="chatwindow" id="{selector}-window"></div>';
+Chatterbox.template.basetab = '<div class="window" id="{selector}-window"></div>';
 
 /**
  * HTML template for a channel view.
@@ -5745,7 +5788,7 @@ Chatterbox.template.basetab = '<div class="chatwindow" id="{selector}-window"></
  * @property channel
  * @type String
  */
-Chatterbox.template.channel = '<div class="chatwindow" id="{selector}-window">\
+Chatterbox.template.channel = '<div class="window" id="{selector}-window">\
                     <header class="title">\
                         <div class="title"></div>\
                         <textarea></textarea>\
@@ -5753,7 +5796,7 @@ Chatterbox.template.channel = '<div class="chatwindow" id="{selector}-window">\
                         <a href="#save" class="button iconic check" title="Save changes"></a>\
                         <a href="#cancel" class="button iconic x" title="Cancel"></a>\
                     </header>\
-                    <div class="chatlog" id="{selector}-log">\
+                    <div class="log" id="{selector}-log">\
                         <header class="topic">\
                             <div class="topic"></div>\
                             <textarea></textarea>\
@@ -5763,7 +5806,7 @@ Chatterbox.template.channel = '<div class="chatwindow" id="{selector}-window">\
                         </header>\
                         <ul class="logwrap"></ul>\
                     </div>\
-                    <div class="chatusers" id="{selector}-users">\
+                    <div class="users" id="{selector}-users">\
                 </div>\
             </div>';
 
