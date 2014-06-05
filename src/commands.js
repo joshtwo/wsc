@@ -8,18 +8,6 @@
 wsc.defaults.Extension = function( client ) {
 
     var ext = {};
-    ext.away = {
-        'on': false,
-        'reason': '',
-        'last': {},
-        'since': 0,
-        'store': client.storage.folder('away'),
-        'format': {
-            'setaway': '/me is away: {reason}',
-            'setback': '/me is back',
-            'away': '{from}: I am away, reason: {reason}'
-        }
-    };
     
     var init = function(  ) {
         // Commands.
@@ -47,9 +35,6 @@ wsc.defaults.Extension = function( client ) {
         client.bind('cmd.disconnect', cmd.connection );
         client.bind('cmd.kill', cmd.killk );
         client.bind('cmd.raw', cmd.raw );
-        
-        client.bind('cmd.clear', cmd.clear );
-        client.bind('cmd.clearall', cmd.clearall );
         client.bind('cmd.close', cmd.close );
         
         client.bind('pkt.property', pkt_property );
@@ -57,118 +42,12 @@ wsc.defaults.Extension = function( client ) {
         client.bind('pkt.recv_admin_showverbose', pkt_admin_show );
         client.bind('pkt.get', pkt_get );
         
-        
-        // Non-standard commands.
-        client.bind('cmd.gettitle', cmd.gett);
-        client.bind('cmd.gettopic', cmd.gett);
-        
-        // lol themes
-        client.bind('cmd.theme', cmd.theme);
-        // some ui business.
-        client.ui.on('settings.open', settings_page);
-        client.ui.on('settings.open.ran', about_page);
-        client.ui.on('settings.save.ui', settings_save);
-        client.ui.on('settings.save', function(  ) { client.config_save(); } );
     };
     
-    var settings_save = function( e, ui ) {
+    ext.save = function( e, ui ) {
         client.settings.ui.theme = e.theme;
         client.settings.ui.clock = e.clock;
         client.settings.ui.tabclose = e.tabclose;
-    };
-    
-    var settings_page = function( e, ui ) {
-    
-        var page = e.settings.page('Main');
-        var orig = {};
-        orig.username = client.settings.username;
-        orig.pk = client.settings.pk;
-        orig.devel = client.settings.developer;
-        
-        page.item('Form', {
-            'ref': 'login',
-            'title': 'Login',
-            'text': 'Here you can change the username and token used to\
-                    log into the chat server.',
-            'fields': [
-                ['Textfield', {
-                    'ref': 'username',
-                    'label': 'Username',
-                    'default': orig.username
-                }],
-                ['Textfield', {
-                    'ref': 'token',
-                    'label': 'Token',
-                    'default': orig.pk
-                }]
-            ],
-            'event': {
-                'save': function( event ) {
-                    client.settings.username = event.data.username;
-                    client.settings.pk = event.data.token;
-                }
-            }
-        }, true);
-        
-        page.item('Form', {
-            'ref': 'developer',
-            'title': 'Developer Mode',
-            'text': 'Turn developer mode on or off.\n\nDeveloper mode will expose any hidden\
-                channel tabs, amongst other things. Keep this turned off unless you\'re working\
-                on implementing something.',
-            'fields': [
-                ['Checkbox', {
-                    'ref': 'enabled',
-                    'items': [
-                        { 'value': 'on', 'title': 'On', 'selected': orig.devel }
-                    ]
-                }]
-            ],
-            'event': {
-                'change': function( event ) {
-                    client.settings.developer = (event.data.enabled.indexOf('on') != -1);
-                    client.ui.developer(client.settings.developer);
-                },
-                'save': function( event ) {
-                    orig.devel = client.settings.developer;
-                },
-                'close': function( event ) {
-                    client.settings.developer = orig.devel;
-                    client.ui.developer(client.settings.developer);
-                }
-            }
-        });
-        
-        page.item('Text', {
-            'ref': 'intro',
-            'title': 'Main',
-            'text': 'Use this window to view and change your settings.\n\nCheck\
-                    the different pages to see what settings can be changed.',
-        }, true);
-        
-        page.item('Text', {
-            'ref': 'debug',
-            'wclass': 'faint',
-            'title': 'Debug Information',
-            'text': 'Chat Agent: <code>' + client.settings.agent + '</code>\n\nUser\
-                    Agent: <code>' + navigator.userAgent + '</code>'
-        });
-    
-    };
-        
-    var about_page = function( e, ui ) {
-    
-        var page = e.settings.page('About', true);
-        page.item('Text', {
-            'ref': 'about-wsc',
-            'title': 'Wsc',
-            'text': 'Currently using <a href="http://github.com/photofroggy/wsc/">wsc</a>\
-                    version ' + wsc.VERSION + ' ' + wsc.STATE + '.\n\nWsc\
-                    works using HTML5, javascript, and CSS3. WebSocket is used for the connection\
-                    where possible. The source code for this client is pretty huge.\n\nWsc was created\
-                    by ~<a href="http://photofroggy.deviantart.com/">photofroggy</a>'
-        });
-    
     };
     
     /**
@@ -178,10 +57,6 @@ wsc.defaults.Extension = function( client ) {
      * @type Object
      */
     var cmd = {};
-    
-    cmd.theme = function( e, client) {
-        client.ui.theme(e.args.split(' ').shift());
-    };
         
     /**
      * This command allows the user to change the settings for the client through
@@ -307,49 +182,14 @@ wsc.defaults.Extension = function( client ) {
     
     // Say something.
     cmd.say = function( e ) {
-        if( client.channel(e.target).monitor ) return;
+        if( client.channel(e.target).monitor )
+            return;
         client.say( e.target, e.args );
     };
     
     // Say something without emotes and shit. Zomg.
     cmd.npmsg = function( e ) {
         client.npmsg( e.target, e.args );
-    };
-    
-    // Clear the channel's log.
-    cmd.clear = function( e, client ) {
-        if( e.args.length > 0 ) {
-            var users = e.args.split(' ');
-            for( var i in users ) {
-                if( !users.hasOwnProperty(i) )
-                    continue;
-                client.ui.channel( e.target ).clear_user( users[i] );
-            }
-        } else {
-            client.ui.channel( e.target ).clear();
-        }
-    };
-    
-    // Clear all channel logs.
-    cmd.clearall = function( e, client ) {
-        var method = null;
-        
-        if( e.args.length > 0 ) {
-            var users = e.args.split(' ');
-            method = function( ns, channel ) {
-                for( var i in users ) {
-                    if( !users.hasOwnProperty(i) )
-                        continue;
-                    channel.clear_user( users[i] );
-                }
-            };
-        } else {
-            method = function( ns, channel ) {
-                channel.clear();
-            };
-        }
-        
-        client.ui.chatbook.each( method, true );
     };
     
     cmd.close = function( cmd ) {
@@ -372,12 +212,6 @@ wsc.defaults.Extension = function( client ) {
         client.disconnect(  );
     };
     
-    // Get the title or topic.
-    cmd.gett = function( event, client ) {
-        var which = event.cmd.indexOf('title') > -1 ? 'title' : 'topic';
-        client.ui.control.set_text('/' + which + ' ' + client.channel(event.target).info[which].content);
-    };
-    
     // Process a property packet, hopefully retreive whois info.
     var pkt_property = function( event, client ) {
         if(event.p != 'info')
@@ -387,20 +221,58 @@ wsc.defaults.Extension = function( client ) {
         var data = subs.shift().arg;
         data.username = event.sns.substr(1);
         data.connections = [];
-        var conn = {};
+        var conn = null;
+        var section = {};
         
         while( subs.length > 0 ) {
-            conn = subs.shift().arg;
-            conn.channels = [];
-            while( subs.length > 0 ) {
-                if( subs[0].cmd != 'ns' )
+            section = subs.shift();
+            
+            switch( section.cmd ) {
+                
+                case 'conn':
+                    if( conn != null ) {
+                        data.connections.push(conn);
+                    }
+                    
+                    conn = section.arg;
+                    conn.channels = [];
                     break;
-                conn.channels.unshift( client.deform_ns(subs.shift().param) );
+                
+                case 'agent':
+                    conn.agent = [[ 'agent', section.arg.agent ]];
+                    
+                    if( section.arg.hasOwnProperty('url') )
+                        conn.agent.push( [ 'url', section.arg.url ] );
+                    
+                    if( section.arg.hasOwnProperty('browser') )
+                        conn.agent.push( [ 'browser', section.arg.browser ] );
+                    
+                    for( var k in section.arg ) {
+                        if( k == 'agent' || k == 'url' || k == 'browser' )
+                            continue;
+                        
+                        if( section.arg.hasOwnProperty( k ) ) {
+                            conn.agent.push( [ k, section.arg[k] ] );
+                        }
+                    }
+                    break;
+                
+                case 'ns':
+                    conn.channels.unshift( client.deform_ns(section.param) );
+                    break;
+            
             }
-            data.connections.push(conn);
+        
         }
         
-        client.ui.chatbook.current.log_whois(data);
+        data.connections.push(conn);
+        
+        client.trigger( 'pkt.whois', {
+            name: 'pkt.whois',
+            pkt: event.pkt,
+            info: data
+        });
+        
     };
     
     var pkt_get = function( event, client ) {
@@ -451,20 +323,22 @@ wsc.defaults.Extension = function( client ) {
      * 
      * @method Ignore
      */
-    wsc.defaults.Extension.Ignore(client);
+    wsc.defaults.Extension.Ignore(client, ext);
     
     /**
      * Implements away messages.
      * 
      * @method Away
      */
-    wsc.defaults.Extension.Away(client);
+    wsc.defaults.Extension.Away(client, ext);
     
     /**
      * Implements autojoin channels.
      * 
      * @method Autojoin
      */
-    wsc.defaults.Extension.Autojoin(client);
+    wsc.defaults.Extension.Autojoin(client, ext);
+    
+    return ext;
 
 };

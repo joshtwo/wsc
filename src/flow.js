@@ -22,29 +22,65 @@ wsc.Flow.prototype.open = function( client, event, sock ) {
 
 // WebSocket connection closed!
 wsc.Flow.prototype.close = function( client, event ) {
-    client.trigger('closed', {name: 'closed', pkt: new wsc.Packet('connection closed\n\n')});
+    var evt = {
+        name: 'closed',
+        pkt: new wsc.Packet('connection closed\n\n'),
+        reason: '',
+        evt: event,
+        // Were we fully connected or did we fail to connect?
+        connected: client.connected,
+        // Are we using SocketIO?
+        sio: client.conn instanceof wsc.SocketIO,
+        cause: event.cause || null,
+        reconnect: true
+    };
+    
+    var logevt = {
+        name: 'log',
+        ns: '~System',
+        msg: '',
+        info: ''
+    };
+    
+    client.trigger( 'closed', evt );
     
     if(client.connected) {
-        client.ui.server_message("Connection closed");
+        logevt.msg = 'Connection closed';
+        client.trigger( 'log', logevt );
         client.connected = false;
         if( client.conn instanceof wsc.SocketIO ) {
-            client.ui.server_message("At the moment there is a problem with reconnecting under socket.io.");
-            client.ui.server_message("Refresh the page to connect.");
+            logevt.msg = 'At the moment there is a problem with reconnecting with socket.io';
+            logevt.info = 'Refresh to connect';
+            client.trigger( 'log', logevt );
+            logevt.info = '';
             return;
         }
     } else {
-        client.ui.server_message("Connection failed");
+        logevt.msg = 'Connection failed';
+        client.trigger( 'log', logevt );
     }
     
-    // For now we want to automatically reconnect.
-    // Should probably be more intelligent about this though.
+    evt.name = 'quit';
+    
+    // Tried more than twice? Give up.
     if( client.attempts > 2 ) {
-        client.ui.server_message("Can't connect. Try again later.");
+        //client.ui.server_message("Can't connect. Try again later.");
+        evt.reconnect = false;
         client.attempts = 0;
+        client.trigger( 'quit', evt );
         return;
     }
     
-    client.ui.server_message("Connecting in 2 seconds");
+    // If login failure occured, don't reconnect
+    if( event.cause ) {
+        if( event.cause.hasOwnProperty( 'name' ) && event.cause.name == 'login' ) {
+            client.trigger( 'quit', evt );
+            return;
+        }
+    }
+    
+    // Notify everyone we'll be reconnecting soon
+    //client.ui.server_message("Connecting in 2 seconds");
     
     setTimeout(function () {
         client.connect();
@@ -126,8 +162,7 @@ wsc.Flow.prototype.login = function( event, client ) {
         client.settings['symbol'] = info.arg.symbol;
         client.settings['userinfo'] = info.arg;
         
-        // Autojoin!
-        if ( client.fresh ) {
+        var joiner = function(  ) {
             client.join(client.settings["autojoin"]);
             if( client.autojoin.on ) {
                 for( var i in client.autojoin.channel ) {
@@ -136,14 +171,10 @@ wsc.Flow.prototype.login = function( event, client ) {
                     client.join(client.autojoin.channel[i]);
                 }
             }
-        } else {
-            for( key in client.channelo ) {
-                if( client.channelo[key].namespace[0] != '~' )
-                    client.join(key);
-            }
-        }
+        };
+        
     } else {
-        //client.close();
+        client.close( event );
     }
     
     if( client.fresh )
@@ -162,11 +193,17 @@ wsc.Flow.prototype.login = function( event, client ) {
 wsc.Flow.prototype.join = function( event, client ) {
     if(event.pkt["arg"]["e"] == "ok") {
         var ns = client.deform_ns(event.pkt["param"]);
-        //client.monitor("You have joined " + ns + '.');
         client.create_ns(ns, client.hidden.contains(event.pkt['param']));
-        client.ui.channel(ns).server_message("You have joined " + ns);
     } else {
-        client.ui.chatbook.current.server_message("Failed to join " + client.deform_ns(event.pkt["param"]), event.pkt["arg"]["e"]);
+        client.trigger( 'log',
+            {
+                name: 'log',
+                ns: 'server:current',
+                sns: '~current',
+                msg: "Failed to join " + client.deform_ns(event.pkt["param"]),
+                info: event.pkt["arg"]["e"]
+            }
+        );
     }
 };
 
@@ -206,8 +243,15 @@ wsc.Flow.prototype.part = function( event, client ) {
             this.message( client, { data: 'disconnect\ne='+e.r+'\n' } );
         }
     } else {
-        client.monitor('Couldn\'t leave ' + ns, event.e);
-        c.server_message("Couldn't leave "+ns, event.e);
+        client.trigger( 'log',
+            {
+                name: 'log',
+                ns: 'server:current',
+                sns: '~current',
+                msg: "Couldn't leave " + ns,
+                info: event.e
+            }
+        );
     }
     
 };

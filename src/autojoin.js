@@ -1,118 +1,96 @@
 /**
  * Autojoin extension.
  */
-wsc.defaults.Extension.Autojoin = function( client ) {
+wsc.defaults.Extension.Autojoin = function( client, ext ) {
 
-    var settings = client.autojoin;
-    client.ui.nav.add_button( {
-        'icon': 'chat',
-        'label': '',
-        'title': 'Join your autojoin channels',
-        'href': '#autojoin-do',
-        'handler': function(  ) {
-            for( var i in client.autojoin.channel ) {
-                if( !client.autojoin.channel.hasOwnProperty(i) )
-                    continue;
-                client.join(client.autojoin.channel[i]);
-            }
-        }
-    });
+    ext.autojoin = {
+        on: false,
+        channel: []
+    };
+    
+    var fresh_client = true;
+    var storage = client.storage.folder('autojoin');
     
     var init = function(  ) {
     
+        ext.autojoin.load();
+        ext.autojoin.save();
+        
         client.bind('cmd.autojoin', cmd_autojoin);
-        client.ui.on('settings.open', settings.page);
+        client.bind('pkt.login', on_login);
     
     };
     
-    settings.page = function( event, ui ) {
+    ext.autojoin.load = function(  ) {
     
-        var page = event.settings.page('Autojoin');
-        var ul = '<ul>';
-        var orig = {};
-        orig.ajon = client.autojoin.on;
-        orig.chan = client.autojoin.channel;
+        ext.autojoin.on = ( storage.get('on', 'true') == 'true' );
+        ext.autojoin.channel = JSON.parse( storage.get('channel', '[]') );
+    
+    };
+    
+    ext.autojoin.save = function(  ) {
+    
+        storage.set('on', ext.autojoin.on.toString());
+        storage.set('channel', JSON.stringify( ext.autojoin.channel ));
+    
+    };
+    
+    ext.autojoin.join = function(  ) {
+        for( var i in ext.autojoin.channel ) {
+            if( !ext.autojoin.channel.hasOwnProperty(i) )
+                continue;
+            client.join(ext.autojoin.channel[i]);
+        }
+    };
+    
+    ext.autojoin.add = function( item ) {
+        if( ext.autojoin.channel.indexOf( item ) != -1 )
+            return false;
         
-        if( client.autojoin.channel.length == 0 ) {
-            ul+= '<li><i>No autojoin channels set</i></li></ul>';
+        ext.autojoin.channel.push( item );
+        ext.autojoin.save();
+        return true;
+    };
+    
+    ext.autojoin.remove = function( item ) {
+        var ci = ext.autojoin.channel.indexOf( item );
+        if( ci == -1 )
+            return false;
+        
+        ext.autojoin.channel.splice( ci, 1 );
+        ext.autojoin.save();
+        return true;
+    };
+    
+    var on_login = function( event, client ) {
+        
+        if( event.e != 'ok' )
+            return;
+        
+        if ( fresh_client ) {
+        
+            client.join( client.settings.autojoin );
+            
+            if( ext.autojoin.on )
+                ext.autojoin.join();
+        
         } else {
-            for( var i in client.autojoin.channel ) {
-                if( !client.autojoin.channel.hasOwnProperty( i ) )
-                    continue;
-                ul+= '<li>' + client.autojoin.channel[i] + '</li>';
+        
+            var joined = false;
+            
+            for( key in client.channelo ) {
+                if( client.channelo[key].namespace[0] != '~' ) {
+                    client.join(key);
+                    joined = true;
+                }
             }
-            ul+= '</ul>';
+            
+            if( !joined )
+                ext.autojoin.join();
+            
         }
         
-        page.item('Checkbox', {
-            'ref': 'eaj',
-            'title': 'Autojoin',
-            'text': 'Turn on autojoin to automatically join selected channels\
-                    when you connect to the chat server.',
-            'items': [
-                { 'value': 'yes', 'title': 'On', 'selected': orig.ajon }
-            ],
-            'event': {
-                'change': function( event ) {
-                    if( event.target.value == 'yes' )
-                        client.autojoin.on = event.target.checked;
-                },
-                'save': function( event ) {
-                    orig.ajon = client.autojoin.on;
-                    client.config_save();
-                },
-                'close': function( event ) {
-                    client.autojoin.on = orig.ajon;
-                }
-            }
-        });
-        
-        var imgr = page.item('Items', {
-            'ref': 'channelss',
-            'title': 'Channels',
-            'text': 'Add any channels you want to join automatically when you\
-                    connect to the chat server.',
-            'items': client.autojoin.channel,
-            'prompt': {
-                'title': 'Add Channel',
-                'label': 'Channel:',
-            },
-            'event': {
-                'up': function( event ) {
-                    var swap = event.args.swap;
-                    client.autojoin.channel[swap['this'].index] = swap.that.item;
-                    client.autojoin.channel[swap.that.index] = swap['this'].item;
-                    imgr.options.items = client.autojoin.channel;
-                },
-                'down': function( event ) {
-                    var swap = event.args.swap;
-                    client.autojoin.channel[swap['this'].index] = swap.that.item;
-                    client.autojoin.channel[swap.that.index] = swap['this'].item;
-                    imgr.options.items = client.autojoin.channel;
-                },
-                'add': function( event ) {
-                    var item = client.deform_ns(event.args.item).toLowerCase();
-                    var index = client.autojoin.channel.indexOf(item);
-                    
-                    if( index != -1 )
-                        return;
-                    
-                    client.autojoin.channel.push( item );
-                    imgr.options.items = client.autojoin.channel;
-                },
-                'remove': function( event ) {
-                    client.autojoin.channel.splice( event.args.index, 1 );
-                    imgr.options.items = client.autojoin.channel;
-                },
-                'save': function( event ) {
-                    orig.chan = client.autojoin.channel;
-                    client.config_save();
-                },
-                'close': function( event ) {
-                    client.config_load();
-                }
-            }
-        });
+        fresh_client = false;
     
     };
     
@@ -124,66 +102,85 @@ wsc.defaults.Extension.Autojoin = function( client ) {
             return;
         
         var subcmd = args.shift().toLowerCase();
-        var meth = function( item ) {};
+        var meth = null;
+        var success = '';
+        var fail = '';
         var mod = false;
         var chan = client.channel(cmd.ns);
         
         switch( subcmd ) {
         
             case 'add':
-                meth = function( item ) {
-                    if( client.autojoin.channel.indexOf( item ) == -1 ) {
-                        mod = true;
-                        client.autojoin.channel.push( item );
-                        chan.server_message('Added ' + item + ' to your autojoin.');
-                    } else {
-                        chan.server_message('Already have ' + item + ' on your autojoin.');
-                    }
-                };
+                meth = ext.autojoin.add;
+                success = 'Added {item} to your autojoin.';
+                fail = 'Already have {item} on your autojoin.';
                 break;
             case 'rem':
             case 'remove':
-                meth = function( item ) {
-                    var ci = client.autojoin.channel.indexOf( item );
-                    if( ci != -1 ) {
-                        mod = true;
-                        client.autojoin.channel.splice( ci, 1 );
-                        chan.server_message('Removed ' + item + ' from your autojoin.');
-                    } else {
-                        chan.server_message(item + ' is not on your autojoin list.');
-                    }
-                };
+                meth = ext.autojoin.remove;
+                success = 'Removed {item} from your autojoin.';
+                fail = item + ' is not on your autojoin list.';
                 break;
             case 'on':
-                chan.server_message('Autojoin on.');
-                if( !client.autojoin.on ) {
+                client.trigger( 'log',
+                    {
+                        name: 'log',
+                        ns: 'server:current',
+                        sns: '~current',
+                        msg: 'Autojoin on'
+                    }
+                );
+                if( !ext.autojoin.on ) {
                     mod = true;
-                    client.autojoin.on = true;
+                    ext.autojoin.on = true;
                 }
                 break;
             case 'off':
-                chan.server_message('Autojoin off.');
-                if( client.autojoin.on ) {
+                client.trigger( 'log',
+                    {
+                        name: 'log',
+                        ns: 'server:current',
+                        sns: '~current',
+                        msg: 'Autojoin off'
+                    }
+                );
+                if( ext.autojoin.on ) {
                     mod = true;
-                    client.autojoin.on = false;
+                    ext.autojoin.on = false;
                 }
+                break;
+            default:
+                ext.autojoin.join();
                 break;
         
         }
         
         var item = '';
+        var res = false;
         
-        for( var i in args ) {
-        
-            if( !args.hasOwnProperty(i) )
-                continue;
-            item = client.deform_ns(args[i]).toLowerCase();
-            meth( item );
-        
+        if( meth != null ) {
+            for( var i in args ) {
+            
+                if( !args.hasOwnProperty(i) )
+                    continue;
+                
+                item = client.deform_ns(args[i]).toLowerCase();
+                res = meth( item );
+                
+                client.trigger( 'log',
+                    {
+                        name: 'log',
+                        ns: 'server:current',
+                        sns: '~current',
+                        msg: replaceAll( ( res ? success : fail ), '{item}', item )
+                    }
+                );
+            
+            }
         }
         
         if( mod )
-            client.config_save();
+            ext.autojoin.save();
     
     };
     
