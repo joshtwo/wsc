@@ -4,13 +4,13 @@
  * @module wsc
  */
 var wsc = {};
-wsc.VERSION = '1.7.54';
+wsc.VERSION = '1.8.55';
 wsc.STATE = 'release candidate';
-wsc.REVISION = '0.21.139';
+wsc.REVISION = '0.22.140';
 wsc.defaults = {};
 wsc.defaults.theme = 'wsct_dark';
 wsc.defaults.themes = [ 'wsct_dAmn', 'wsct_dark' ];
-// Taken from dAmnAIR by philo23
+;// Taken from dAmnAIR by philo23
 // dAmnAIR - http://botdom.com/wiki/DAmnAIR
 // philo23 on deviantART - http://philo23.deviantart.com/
 
@@ -73,7 +73,7 @@ function EventEmitter() {
     this.removeListeners = removeListeners;
     this.emit = emit;
     this.listeners = listeners;
-}/*
+};/*
 CryptoJS v3.1.2
 code.google.com/p/crypto-js
 (c) 2009-2013 by Jeff Mott. All rights reserved.
@@ -93,7 +93,7 @@ d,e,j,9,a[29]),e=m(e,f,c,d,u,14,a[30]),d=m(d,e,f,c,A,20,a[31]),c=l(c,d,e,f,s,4,a
 C,15,a[50]),d=n(d,e,f,c,s,21,a[51]),c=n(c,d,e,f,A,6,a[52]),f=n(f,c,d,e,q,10,a[53]),e=n(e,f,c,d,y,15,a[54]),d=n(d,e,f,c,w,21,a[55]),c=n(c,d,e,f,v,6,a[56]),f=n(f,c,d,e,D,10,a[57]),e=n(e,f,c,d,t,15,a[58]),d=n(d,e,f,c,B,21,a[59]),c=n(c,d,e,f,r,6,a[60]),f=n(f,c,d,e,z,10,a[61]),e=n(e,f,c,d,j,15,a[62]),d=n(d,e,f,c,x,21,a[63]);b[0]=b[0]+c|0;b[1]=b[1]+d|0;b[2]=b[2]+e|0;b[3]=b[3]+f|0},_doFinalize:function(){var a=this._data,k=a.words,b=8*this._nDataBytes,h=8*a.sigBytes;k[h>>>5]|=128<<24-h%32;var l=s.floor(b/
 4294967296);k[(h+64>>>9<<4)+15]=(l<<8|l>>>24)&16711935|(l<<24|l>>>8)&4278255360;k[(h+64>>>9<<4)+14]=(b<<8|b>>>24)&16711935|(b<<24|b>>>8)&4278255360;a.sigBytes=4*(k.length+1);this._process();a=this._hash;k=a.words;for(b=0;4>b;b++)h=k[b],k[b]=(h<<8|h>>>24)&16711935|(h<<24|h>>>8)&4278255360;return a},clone:function(){var a=t.clone.call(this);a._hash=this._hash.clone();return a}});r.MD5=t._createHelper(q);r.HmacMD5=t._createHmacHelper(q)})(Math);
 
-/**
+;/**
  * Client transport.
  * Acts as a basic wrapper around a transport.
  * 
@@ -444,7 +444,7 @@ wsc.SocketIO.prototype.close = function(  ) {
 
 
 
-/* wsc lib - photofroggy
+;/* wsc lib - photofroggy
  * Generic useful functions or something.
  */
 
@@ -693,7 +693,7 @@ StringSet.prototype.contains = function( item ) {
     return this.items.indexOf( item.toLowerCase() ) != -1;
 
 };
-
+;
 /**
  * Middleware management and execution.
  * 
@@ -742,7 +742,7 @@ wsc.Middleware.prototype.run = function( event, method, data ) {
     done( data );
 
 };
-/**
+;/**
  * Storage object.
  * 
  * This class is a light wrapper around localStorage. Keys are given namespaces, to avoid
@@ -856,7 +856,7 @@ wsc.Storage.prototype.remove = function( key ) {
     return false;
 
 };
-/* wsc packets - photofroggy
+;/* wsc packets - photofroggy
  * Methods to parse and create packets for the chat protocol.
  */
 
@@ -983,7 +983,7 @@ function packetEvtName( pkt ) {
     
     return name;
 }
-/**
+;/**
  * Chat channel object.
  * Manages channel events and data, and acts as a thin wrapper for the
  * channel's UI object.
@@ -1347,7 +1347,7 @@ wsc.Channel.prototype.recv_kicked = function( e ) {
     
 };
 
-/**
+;/**
  * Rendered message object.
  * 
  * @class wsc.MessageString
@@ -1428,7 +1428,7 @@ wsc.MessageParser.prototype.render = function( mode, data ) {
 
 
 
-/**
+;/**
  * Parser for dAmn-like protocols.
  * 
  * @class wsc.Protocol
@@ -1751,7 +1751,7 @@ wsc.Protocol.prototype.map = function( packet, event, mapping ) {
 
 };
 
-/**
+;/**
  * Control the client's program flow. This object determines how the client responds to
  * certain events.
  * 
@@ -2126,7 +2126,7 @@ wsc.Flow.prototype.recv_kicked = function( event, client ) {
 };
 
 
-
+;
 
 /**
  * This extension implements most of the default commands for wsc.
@@ -2470,7 +2470,7 @@ wsc.defaults.Extension = function( client ) {
     return ext;
 
 };
-/**
+;/**
  * Autojoin extension.
  */
 wsc.defaults.Extension.Autojoin = function( client, ext ) {
@@ -2660,7 +2660,7 @@ wsc.defaults.Extension.Autojoin = function( client, ext ) {
 
 };
 
-/**
+;/**
  * Away extension.
  */
 wsc.defaults.Extension.Away = function( client, ext ) {
@@ -2692,14 +2692,12 @@ wsc.defaults.Extension.Away = function( client, ext ) {
     
     };
     
-    
-    // Away message stuff.
-    var cmd_setaway = function( event, client ) {
+    ext.away.away = function( reason ) {
     
         ext.away.on = true;
         ext.away.last = {};
         ext.away.since = new Date();
-        ext.away.reason = event.args;
+        ext.away.reason = reason || '';
         
         var method = client.say;
         var announce = replaceAll(
@@ -2725,7 +2723,7 @@ wsc.defaults.Extension.Away = function( client, ext ) {
     
     };
     
-    var cmd_setback = function( event, client ) {
+    ext.away.back = function(  ) {
     
         if( !ext.away.on )
             return;
@@ -2744,6 +2742,19 @@ wsc.defaults.Extension.Away = function( client, ext ) {
         } );
         
         client.trigger( 'ext.away.back', { name: 'ext.away.back' } );
+    
+    };
+    
+    // Away message stuff.
+    var cmd_setaway = function( event, client ) {
+    
+        ext.away.away( event.args );
+    
+    };
+    
+    var cmd_setback = function( event, client ) {
+    
+        ext.away.back();
     };
     
     var msg_pkt = function( event ) {
@@ -2804,7 +2815,7 @@ wsc.defaults.Extension.Away = function( client, ext ) {
 
 };
 
-/**
+;/**
  * Ignore extension.
  * 
  * Implements the ignore functionality.
@@ -2928,7 +2939,7 @@ wsc.defaults.Extension.Ignore = function( client, ext ) {
 
 };
 
-/**
+;/**
  * An entire chat client. Instances of this object orchestrate the operation of
  * the client. Other objects are loaded in to control different parts of the client. These
  * components can be reasonably swapped out, assuming they provide the same functionality.
@@ -3776,7 +3787,7 @@ wsc.Client.prototype.disconnect = function(  ) {
 
 };
 
-/**
+;/**
  * This module holds the dAmn extension.
  *
  * 
@@ -3784,7 +3795,7 @@ wsc.Client.prototype.disconnect = function(  ) {
  * @submodule dAmn
  */
 wsc.dAmn = {};
-wsc.dAmn.VERSION = '0.10.36';
+wsc.dAmn.VERSION = '0.14.46';
 wsc.dAmn.STATE = 'alpha';
 
 
@@ -3951,6 +3962,18 @@ wsc.dAmn.chatterbox = function( ui ) {
 
 };
 
+
+wsc.dAmn.tadpole = function( client, ui ) {
+
+    var settings = {};
+    
+    wsc.dAmn.tadpole.Emotes( client, ui, settings );
+    wsc.dAmn.tadpole.Stash( client, ui, settings );
+    
+    return settings;
+
+};
+;
 wsc.dAmn.BDS = function( client, storage, settings ) {
 
     var pchats = {};
@@ -3966,7 +3989,28 @@ wsc.dAmn.BDS = function( client, storage, settings ) {
         'provides': [
             'BOTCHECK',
             'CLINK'
-        ]
+        ],
+        versions: [],
+        add_version: function( app, version ) {
+            settings.bds.versions.push({
+                'app': app,
+                'version': version
+            });
+        },
+        app: function(  ) {
+            var apps = [];
+            for( var i = 0; i < settings.bds.versions.length; i++ ) {
+                apps.push(settings.bds.versions[i].app);
+            }
+            return apps.join('.');
+        },
+        appv: function(  ) {
+            var apps = [];
+            for( var i = 0; i < settings.bds.versions.length; i++ ) {
+                apps.push(settings.bds.versions[i].version);
+            }
+            return apps.join('/');
+        }
     };
     // Allow other parts of client to use bds functionality.
     client.bds = settings.bds;
@@ -3998,6 +4042,9 @@ wsc.dAmn.BDS = function( client, storage, settings ) {
         // Filter BDS commands
         //client.ui.middle( 'log_item', function( data, done ) { handle.filter( data, done ); } );
         client.middle( 'chan.recv_msg', function( data, done ) { handle.hfilter( data, done ); } );
+            
+        settings.bds.add_version( 'wsc', wsc.VERSION );
+        settings.bds.add_version( 'dAmn', wsc.dAmn.VERSION );
     };
     
     var pkt_login = function( event ) {
@@ -4125,7 +4172,9 @@ wsc.dAmn.BDS = function( client, storage, settings ) {
         // Botcheck
         botcheck: function( event ) {
             // Make this actually work.
-            if( event.head[2] != 'ALL' && event.payload != client.settings.username ) {
+            if( event.head[2] != 'ALL'
+                && event.payload.toLowerCase().indexOf(
+                    client.settings.username.toLowerCase()) == -1 ) {
                 return;
             }
             
@@ -4133,9 +4182,12 @@ wsc.dAmn.BDS = function( client, storage, settings ) {
                 return;
             }
             
-            var ver = wsc.VERSION + '/0.0.0/' + wsc.dAmn.VERSION + '/' + settings.bds.version;
-            var hash = CryptoJS.MD5( ( 'wsc.dAmn' + ver + client.settings.username + event.user ).toLowerCase() );
-            client.npmsg( event.ns, 'BDS:BOTCHECK:CLIENT:' + event.user + ',wsc.dAmn,' + ver + ',' + hash );
+            var ver = settings.bds.appv() + '/' + settings.bds.version;
+            var app = settings.bds.app();
+            var hash = CryptoJS.MD5( ( app + ver + client.settings.username + event.user ).toLowerCase() );
+            client.npmsg( event.ns, 'BDS:BOTCHECK:CLIENT:'
+                + event.user
+                + ',' + app + ',' + ver + ',' + hash );
         },
         
         // BDS:BOTCHECK:OK||DENIED
@@ -4315,7 +4367,7 @@ wsc.dAmn.BDS = function( client, storage, settings ) {
     init();
 
 };
-
+;
 
 wsc.dAmn.wsc.Colours = function( client, storage, ext ) {
     
@@ -4442,7 +4494,7 @@ wsc.dAmn.chatterbox.Colours = function( client, ui, ext ) {
     ui.on('log_item.after', ext.colours.parse_colour);
 
 };
-
+;
 wsc.dAmn.Emotes = {};
 
 wsc.dAmn.wsc.Emotes = function( client, storage, settings ) {
@@ -4451,6 +4503,12 @@ wsc.dAmn.wsc.Emotes = function( client, storage, settings ) {
     settings.emotes.fint = null;
     settings.emotes.fetching = false;
     settings.emotes.loaded = false;
+    settings.emotes.smap = {
+        'A': [], 'B': [], 'C': [], 'D': [], 'E': [], 'F': [], 'G': [],
+        'H': [], 'I': [], 'J': [], 'K': [], 'L': [], 'M': [], 'N': [],
+        'O': [], 'P': [], 'Q': [], 'R': [], 'S': [], 'T': [], 'U': [],
+        'V': [], 'W': [], 'X': [], 'Y': [], 'Z': [], '#': [], 
+    };
     
     settings.emotes.fetch = function(  ) {
         if( settings.emotes.loaded ) {
@@ -4460,25 +4518,59 @@ wsc.dAmn.wsc.Emotes = function( client, storage, settings ) {
         }
         settings.emotes.fetching = true;
         jQuery.getJSON('http://www.thezikes.org/publicemotes.php?format=jsonp&jsoncallback=?&' + (new Date()).getDay(), function(data){
+            console.log('>> fetching emote list.');
             settings.emotes.fetching = false;
             settings.emotes.emote = data;
+            settings.emotes.cache.update( data );
+            settings.emotes.sort();
             
             if( !settings.emotes.loaded ) {
                 if( settings.emotes.on ) {
                     client.trigger( 'dAmn.emotes.loaded', { name: 'dAmn.emotes.loaded' } );
                 }
+            } else {
+                client.trigger( 'dAmn.emotes.refreshed', { name: 'dAmn.emotes.refreshed' } );
             }
             
-            settings.emotes.sort();
             settings.emotes.loaded = true;
             //settings.emotes.picker.loaded();
-            settings.emotes.fint = setTimeout( settings.emotes.fetch, 3600000 );
+            //settings.emotes.fint = setTimeout( settings.emotes.fetch, 3600000 );
         },
         function(  ) {
             //settings.emotes.picker.loaded();
             return false;
         });
     };
+    
+    settings.emotes.receive = function(err, data){
+        if( err || Object.getOwnPropertyNames(data).length == 0 ) {
+            settings.emotes.fetch();
+            return;
+        }
+        
+        if( settings.emotes.fint ) {
+            clearTimeout( settings.emotes.fint );
+            settings.emotes.fint = null;
+        }
+        
+        settings.emotes.fetching = false;
+        settings.emotes.emote = data;
+        settings.emotes.sort();
+        
+        if( !settings.emotes.loaded ) {
+            if( settings.emotes.on ) {
+                client.trigger( 'dAmn.emotes.loaded', { name: 'dAmn.emotes.loaded' } );
+            }
+        } else {
+            client.trigger( 'dAmn.emotes.refreshed', { name: 'dAmn.emotes.refreshed' } );
+        }
+        
+        settings.emotes.loaded = true;
+        //settings.emotes.picker.loaded();
+        //settings.emotes.fint = setTimeout( settings.emotes.fetch, 3600000 );
+    };
+    
+    settings.emotes.cache = new wsc.dAmn.Emotes.Cache(settings.emotes.receive);
     
     settings.emotes.swap = function( data, done ) {
     
@@ -4534,27 +4626,30 @@ wsc.dAmn.wsc.Emotes = function( client, storage, settings ) {
     
     settings.emotes.sort = function(  ) {
     
-        var map = [
-            [], [], [], [], [], [], [],
-            [], [], [], [], [], [], [],
-            [], [], [], [], [], [], [],
-            [], [], [], [], [], [], 
-        ];
+        settings.emotes.smap = {
+            'A': [], 'B': [], 'C': [], 'D': [], 'E': [], 'F': [], 'G': [],
+            'H': [], 'I': [], 'J': [], 'K': [], 'L': [], 'M': [], 'N': [],
+            'O': [], 'P': [], 'Q': [], 'R': [], 'S': [], 'T': [], 'U': [],
+            'V': [], 'W': [], 'X': [], 'Y': [], 'Z': [], '#': [], 
+        };
+        
         var alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#';
         var emote = null;
+        var initial = '';
         var mitem = null;
         var prted = false;
         var idex = -1;
         var debug = true;
         
-        /*
-         * Until we have a better option...
         // First part we create our maps for our page items.
         for( var i in settings.emotes.emote ) {
+            
             if( !settings.emotes.emote.hasOwnProperty(i) )
                 continue;
             
             emote = settings.emotes.emote[i];
+            
+            /*
             var t = replaceAll(emote.img.split('/')
                 .pop().split('.').shift(),
                 '__', ' ');
@@ -4576,22 +4671,27 @@ wsc.dAmn.wsc.Emotes = function( client, storage, settings ) {
                 'title': 'created by ' + emote.by,
                 'html': true
             };
+            */
             
-            idex = alpha.indexOf( emote.code.substr(1, 1).toUpperCase() );
+            initial = emote.code[1].toUpperCase();
+            //idex = alpha.indexOf( emote.code.substr(1, 1).toUpperCase() );
+            idex = alpha.indexOf( initial );
             
-            if( idex == -1 )
+            if( idex == -1 ) {
                 idex = alpha.indexOf( '#' );
+                initial = '#'
+            }
             
-            map[idex].push(mitem);
+            settings.emotes.smap[initial].push(emote);
         }
         
         var sorter = function( a, b ) {
-            return caseInsensitiveSort( a.value, b.value );
+            return caseInsensitiveSort( a.code, b.code );
         };
         
-        var dp = settings.emotes.picker.page( '#' );
-        var page = null;
-        
+        //var dp = settings.emotes.picker.page( '#' );
+        //var page = null;
+        /*
         // Now we sort all of the emotes on each page.
         for( var i = 0; i < alpha.length; i++ ) {
             map[i].sort( sorter );
@@ -4602,6 +4702,16 @@ wsc.dAmn.wsc.Emotes = function( client, storage, settings ) {
         // Display the newly sorted emotes.
         settings.emotes.picker.refresh();
         */
+        
+        for( var init in settings.emotes.smap ) {
+        
+            if( !settings.emotes.smap.hasOwnProperty(init) )
+                continue;
+            
+            settings.emotes.smap[init].sort( sorter );
+        
+        }
+        
     
     };
     
@@ -4618,10 +4728,187 @@ wsc.dAmn.wsc.Emotes = function( client, storage, settings ) {
     
     if( !settings.emotes.on )
         return;
-    
-    settings.emotes.fetch();
 
 };
+
+
+/**
+ * Emoticon cache using IndexedDB.
+ * @class wsc.dAmn.Emotes.Cache
+ * @constructor
+ */
+wsc.dAmn.Emotes.Cache = function( onloaded ) {
+
+    this.idb = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+    this.idbt = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
+    this.idbkr = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
+    
+    this.db = null;
+    this.store = null;
+    this.loading = false;
+    this.loaded = false;
+    this.emotes = {};
+    this.onloaded = onloaded || function( err, data ) {};
+    
+    if( !this.idb )
+        return this.onloaded( true, {} );
+    
+    this.open();
+
+};
+
+/**
+ * Open our database.
+ * @method open
+ */
+wsc.dAmn.Emotes.Cache.prototype.open = function(  ) {
+
+    var cache = this;
+    var request = this.idb.open( 'wsc.dAmn.emote.cache', 1 );
+    
+    request.onerror = function( event ) {};
+    
+    request.onsuccess = function( event ) {
+    
+        cache.db = request.result;
+        cache.load();
+    
+    };
+    
+    
+    request.onupgradeneeded = function( event ) {
+    
+        cache.upgrade( event );
+        cache.loaded = true;
+        cache.onloaded( true, {} );
+    
+    };
+
+};
+
+/**
+ * Upgrade the database.
+ * @method upgrade
+ * @param event {Object} Upgrade needed event object.
+ */
+wsc.dAmn.Emotes.Cache.prototype.upgrade = function( event ) {
+
+    var db = event.target.result;
+    
+    this.store = db.createObjectStore( 'emotes', { keyPath: 'code' } );
+
+};
+
+/**
+ * Load the cache.
+ * @method load
+ */
+wsc.dAmn.Emotes.Cache.prototype.load = function(  ) {
+
+    if( this.loading )
+        return;
+    
+    var transaction = this.db.transaction('emotes');
+    var store = transaction.objectStore('emotes');
+    var cache = this;
+    this.loading = true;
+    
+    store.openCursor().onsuccess = function(event) {
+        
+        var cursor = event.target.result;
+        
+        if (cursor) {
+            cache.emotes[cursor.key] = cursor.value;
+            cursor.continue();
+            return;
+        }
+        
+        cache.loading = false;
+        cache.loaded = true;
+        cache.onloaded( false, cache.emotes );
+        
+    };
+
+};
+
+/**
+ * Update the cache.
+ * @method update
+ * @param emotes {Object} Emoticons to update or add.
+ */
+wsc.dAmn.Emotes.Cache.prototype.update = function( emotes ) {
+
+    var uplist = [];
+    var cache = this;
+    
+    for( var k in emotes ) {
+    
+        if( !emotes.hasOwnProperty(k) )
+            continue;
+        
+        this.emotes[k] = emotes[k];
+        uplist.push(emotes[k]);
+    
+    }
+    
+    var store = cache.db.transaction(["emotes"], "readwrite").objectStore("emotes");
+    
+    var update = function(  ) {
+    
+        if( uplist.length == 0 )
+            return;
+        
+        var emote = uplist.pop();
+        
+        var request = store.get(emote.code);
+        
+        request.onerror = function(event) {
+            
+            var request = store.add(emote);
+            
+            request.onerror = function(event) {
+                update();
+            };
+            
+            request.onsuccess = function(event) {
+                update();
+            };
+            
+        };
+        
+        request.onsuccess = function(event) {
+            
+            var data = request.result;
+            var preq = null
+            
+            if( data ) {
+                data.by = emote.by;
+                data.code = emote.code;
+                data.devid = emote.devid;
+                data.img = emote.img;
+                data.myvote = emote.myvote;
+                data.votes = emote.votes;
+                preq = store.put(data);
+            } else {
+                preq = store.add(emote);
+            }
+            
+            preq.onerror = function(event) {
+                update();
+            };
+            
+            preq.onsuccess = function(event) {
+                update();
+            };
+            
+        };
+    
+    };
+    
+    update();
+
+};
+
 
 wsc.dAmn.chatterbox.Emotes = function( client, ui, ext ) {
 
@@ -5088,6 +5375,256 @@ wsc.dAmn.Emotes.Page.prototype.refresh = function(  ) {
 
 };
 
+
+wsc.dAmn.tadpole.Emotes = function( client, ui, settings ) {
+    
+    var pages = ui.menu.settings.page;
+    var cpages = ui.menu.commanditems;
+    var page = pages.add('emotes');
+    var view = page.overlay.view;
+    var api = {};
+    
+    // MENU BUTTONS
+    ui.menu.settings.add( 'emotes', 'CLOUD Emotes', function( event ) {
+    
+        pages.reveal('emotes');
+    
+    } );
+    
+    ui.menu.commands.add( 'emotes', 'emoteconfig', 'CLOUD Emotes', function( event ) {
+    
+        cpages.reveal('emotes');
+    
+    } );
+    
+    view.append('<nav class="emotes"><ul></ul></nav>');
+    
+    var ul = view.find('.emotes ul');
+    
+    // BACK BUTTON
+    new tadpole.MenuButton( ul, 'back', '', 'CLOUD Emotes', function( event ) {
+        page.overlay.hide();
+        page.hide();
+    }, 'left-open' );
+    
+    var emoteb = new tadpole.MenuButton( ul, 'toggle', '', 'Off', function( event ) {
+    
+        api.toggle();
+        client.ext.dAmn.save();
+        api.toggleb();
+    
+    }, 'cancel' );
+    
+    // RELOAD BUTTON
+    var loadb = new tadpole.MenuButton( ul, 'load', '', '', function( event ) {
+    
+        api.reload();
+    
+    } );
+    
+    loadb.button.append('<span class="label"></span><span class="faint">Loading... </span>');
+    var loadbll = loadb.button.find('.faint');
+    var loadbl = loadb.button.find('.label');
+    var emotes = [];
+    
+    // EMOTE LIST
+    /*var emulb = new tadpole.MenuButton( ul, 'eml', '', 'Emotes', function( event ) {} );
+    emulb.button.append('<ul class="emul"></ul>');
+    
+    var emul = emulb.button.find('ul.emul');*/
+    
+    api.toggleb = function(  ) {
+    
+        if( client.ext.dAmn.emotes.on ) {
+            emoteb.button.html(
+                '<span class="green icon-ok"></span>On <span class="faint">'
+                +'tap to turn off</span>'
+            );
+        } else {
+            emoteb.button.html(
+                '<span class="red icon-cancel"></span>Off <span class="faint">'
+                +'tap to turn on</span>'
+            );
+        }
+    
+    };
+    
+    api.toggle = function(  ) {
+    
+        var olds = client.ext.dAmn.emotes.on;
+        client.ext.dAmn.emotes.on = !olds;
+        
+        if( client.ext.dAmn.emotes.on ) {
+            api.reload();
+            return;
+        }
+    };
+    
+    api.loading = function(  ) {
+    
+        loadbl.text('');
+        loadbll.text('Refreshing...');
+    
+    };
+    
+    api.loaded = function(  ) {
+    
+        loadbl.text('Loaded ');
+        loadbll.text('refresh');
+        //api.update();
+    
+    };
+    
+    client.bind('dAmn.emotes.loaded', api.loaded);
+    client.bind('dAmn.emotes.refreshed', api.loaded);
+    
+    api.reload = function(  ) {
+    
+        if( client.ext.dAmn.emotes.fetching
+            || client.ext.dAmn.emotes.cache.loading )
+            return;
+        
+        api.loading();
+        client.ext.dAmn.emotes.fetch();
+    
+    };
+    
+    api.clear = function(  ) {
+    
+        while( emotes.length > 0 ) {
+        
+            emotes[i].remove();
+        
+        }
+    
+    };
+    
+    api.update = function(  ) {
+    
+        api.clear();
+        var edata = client.ext.dAmn.emotes.emote;
+        
+        for( var k in edata ) {
+        
+            if( !edata.hasOwnProperty(k) )
+                continue;
+            
+            var emote = new tadpole.MenuButton( emul, 'emote', edata[k].devid,
+                edata[k].code, function( event ) {
+                    var text = ui.control.get_text();
+                    
+                    control.set_text(
+                        text
+                        + ( text[text.length - 1] == ' ' ? '' : ' ' ) 
+                        + edata[k].code
+                    );
+                }
+            );
+            
+            // Add images to this bit?
+        
+        }
+    
+    };
+    
+    api.toggleb();
+    
+    wsc.dAmn.tadpole.EmotePicker( client, ui, settings );
+
+};
+
+
+wsc.dAmn.tadpole.EmotePicker = function( client, ui, settings ) {
+
+    var pages = ui.menu.settings.page;
+    var picker = ui.menu.commanditems.add( 'emotes' );
+    var view = picker.overlay.view;
+    var sub = {};
+    
+    view.append('<nav class="emotes"><ul></ul></nav>');
+    var ul = view.find( 'ul' );
+    
+    new tadpole.MenuButton( ul, 'back', '', 'CLOUD Emotes', function( event ) {
+        picker.overlay.hide();
+        picker.hide();
+    }, 'left-open' );
+    
+    var setup = function( initial ) {
+        
+        var selector = 'emotes-' + ( initial == '#' ? 'misc' : initial );
+        var page = pages.add(selector);
+        var items = [];
+        
+        new tadpole.MenuButton( ul, 'list', selector, 'List ' + initial, function( event ) {
+            pages.reveal(selector);
+            build();
+        });
+        
+        page.overlay.view.append('<nav class="emotelist"><ul></ul></nav>');
+        var emul = page.overlay.view.find('.emotelist ul');
+        
+        new tadpole.MenuButton( emul, 'title', '', 'Emotes "' + initial + '"',
+            function( event ) {
+                page.overlay.hide();
+                destroy();
+            }
+        );
+        
+        var build = function(  ) {
+        
+            for( var k in client.ext.dAmn.emotes.smap[initial] ) {
+            
+                var em = client.ext.dAmn.emotes.smap[initial][k];
+                
+                var item = new tadpole.MenuButton(
+                    emul, 'emote', em.devid, em.code,
+                    function( event ) {
+                        var text = ui.control.get_text();
+                        
+                        if( text.length > 0 ) {
+                            ui.control.set_text(
+                                text
+                                + ( text[text.length - 1] == ' ' ? '' : ' ' ) 
+                                + em.code
+                            );
+                            return;
+                        }
+                        
+                        ui.control.set_text(em.code);
+                    
+                    }
+                );
+                
+                items.push(item);
+            
+            }
+        
+        };
+        
+        var destroy = function(  ) {
+        
+            while( items.length > 0 ) {
+            
+                items.pop().remove();
+            
+            }
+        
+        };
+    
+    };
+    
+    for( var init in client.ext.dAmn.emotes.smap ) {
+    
+        if( !client.ext.dAmn.emotes.smap.hasOwnProperty(init) )
+            continue;
+        
+        setup(init);
+    
+    }
+    
+
+};
+;
 /**
  * This object provides a few helper functions relating to deviantART avatars.
  * 
@@ -5154,7 +5691,7 @@ wsc.dAmn.avatar.src = function( un, icon ) {
     }
     
     return 'http://a.deviantart.net/avatars/' + ico + '.' + ext + cachebuster;
-};
+};;
 wsc.dAmn.BDS.Link = function( client, storage, settings ) {
 
     var init = function(  ) {
@@ -5404,7 +5941,149 @@ wsc.dAmn.BDS.Link = function( client, storage, settings ) {
     
     init();
 
+};;
+wsc.dAmn.Stash = {};
+
+wsc.dAmn.Stash.dimensions = function( data ) {
+
+    var w = data.thumbnail_width; var h = data.thumbnail_height;
+    var tw, th;
+    
+    if( w/h > 1) {
+        th = parseInt((h * 100) / w);
+        tw = 100;
+    } else {
+        tw = parseInt((w * 100) / h);
+        th = 100;
+    }
+    
+    if( tw > w || th > h ) {
+        tw = w;
+        th = h;
+    }
+    
+    return {
+        height: h,
+        width: w,
+        thumb: {
+            height: th,
+            width: tw
+        }
+    };
+
 };
+
+
+/**
+ * Cache for stash items.
+ * @class wsc.dAmn.Stash.Cache
+ * @constructor
+ */
+wsc.dAmn.Stash.Cache = function(  ) {
+
+    this.item = {};
+    var cache = this;
+    
+    setInterval( function(  ) {
+    
+        cache.uncache();
+    
+    }, 300000 );
+
+};
+
+/**
+ * Remove old items from the cache.
+ * @method uncache
+ */
+wsc.dAmn.Stash.Cache.prototype.uncache = function(  ) {
+
+    var t = (new Date).getTime();
+    
+    for( var id in this.item ) {
+        
+        if( !this.item.hasOwnProperty(id) )
+            continue;
+        
+        if( t - this.item[id].time < 3600000 )
+            continue;
+        
+        delete this.item[id];
+    
+    }
+
+};
+
+/**
+ * Get a stash item.
+ * @method get
+ * @param id {Array} Stash id.
+ * @param callback {Function} Method to call with the resulting html.
+ */
+wsc.dAmn.Stash.Cache.prototype.get = function( id, callback ) {
+
+    var item = this.item[id];
+    
+    if( item ) {
+    
+        callback( item );
+        return;
+    
+    }
+    
+    item = {
+        id: id,
+        url: 'http://sta.sh/' + id,
+        time: (new Date).getTime(),
+        html: null,
+        data: null
+    };
+    
+    var stash = this;
+    
+    var cache = function( data ) {
+    
+        item.data = data;
+        stash.item[id] = item;
+        
+        if( 'error' in data || data.type != 'photo' )
+            return callback(item);
+        
+        item.html = wsc.dAmn.Stash.item_html(item.url, data);
+        callback(item);
+    
+    };
+    
+    $.getJSON(
+        'http://backend.deviantart.com/oembed?url=' + item.url + '&format=jsonp&callback=?',
+        function( stashdata ) {
+            cache( stashdata );
+        }
+    );
+
+};
+
+wsc.dAmn.Stash.cache = new wsc.dAmn.Stash.Cache();
+
+wsc.dAmn.Stash.item_html = function( url, data ) {
+
+    var d = wsc.dAmn.Stash.dimensions( data );
+    var w = d.width; var h = d.height;
+    
+    // Deviation link tag. First segment only.
+    var title = data.title + ' by ' + data.author_name;
+    var anchor = '<a class="stashlink" target="_blank" href="' + url + '" title="' + title + '">';
+    
+    var dim = 'width="' + d.thumb.width + '" height="' + d.thumb.height + '"';
+    //var shadow = !data.thumbnail_url.match(/.png$/i) ? ' shadow' : '';
+    var id = url.split('/').pop();
+    
+    return '<span class="stashthumb" id="'+id+'">' + anchor + '<img class="smaller thumb"' +
+        dim + ' " alt="' + url + '" src="' + data.thumbnail_url_150 + '" />\
+        </a></span>';
+
+};
+
 /**
  * Extension to handle stash links posted in the chat. Provides some helper functions
  * to meet this end as well.
@@ -5423,12 +6102,58 @@ wsc.dAmn.chatterbox.Stash = function( ui, ext ) {
     
         log_item: function( event ) {
         
-            var links = event.item.find('a[href^="http://sta.sh"]');
+            var linkso = event.item.find('a[href^="http://sta.sh"]');
             
-            links.each( function( i, dlink ) {
-                var link = event.item.find(dlink);
-                wsc.dAmn.chatterbox.Stash.fetch( event, link );
+            var links = [];
+            
+            linkso.each( function( index, item ) {
+            
+                links.push( event.item.find(item) );
+            
             } );
+            
+            if( links.length == 0 )
+                return;
+            
+            var next = function(  ) {
+                
+                if( links.length == 0 ) {
+                    event.chan.st+= event.item.height();
+                    event.chan.el.l.w.scrollTop( event.chan.st );
+                    event.chan.scroll();
+                    return;
+                }
+                
+                rlink( links.pop() );
+            
+            };
+            
+            var rlink = function( link ) {
+                
+                if( !link )
+                    return next();
+                
+                var url = link.prop('href');
+                
+                if( !url )
+                    return next();
+                
+                url = url.split('/');
+                var id = url[url.length - 1];
+                
+                wsc.dAmn.Stash.cache.get( id, function( item ) {
+                
+                    if( !item || !item.html )
+                        return next();
+                    
+                    wsc.dAmn.chatterbox.Stash.render( link, item );
+                    next();
+                
+                } );
+            
+            };
+            
+            rlink( links.pop() );
         
         }
     
@@ -5440,61 +6165,12 @@ wsc.dAmn.chatterbox.Stash = function( ui, ext ) {
 
 
 /**
- * Fetch stash data.
- */
-wsc.dAmn.chatterbox.Stash.fetch = function( event, link ) {
-
-    $.getJSON(
-        'http://backend.deviantart.com/oembed?url=' + link.prop('href') + '&format=jsonp&callback=?',
-        function( data ) {
-            wsc.dAmn.chatterbox.Stash.render( event, link, data );
-        }
-    );
-
-};
-
-
-/**
  * Render a stash thumb.
  */
-wsc.dAmn.chatterbox.Stash.render = function( event, link, data ) {
-
-    if( 'error' in data )
-        return;
+wsc.dAmn.chatterbox.Stash.render = function( link, item ) {
     
-    if( data.type != 'photo' )
-        return;
-    
-    var lurl = link.prop('href');
-    var w = data.thumbnail_width; var h = data.thumbnail_height;
-    var tw, th;
-    
-    // Deviation link tag. First segment only.
-    var title = data.title + ' by ' + data.author_name;
-    var anchor = '<a class="stashlink" target="_blank" href="' + lurl + '" title="' + title + '">';
-    
-    if( w/h > 1) {
-        th = parseInt((h * 100) / w);
-        tw = 100;
-    } else {
-        tw = parseInt((w * 100) / h);
-        th = 100;
-    }
-    
-    if( tw > w || th > h ) {
-        tw = w;
-        th = h;
-    }
-    
-    var dim = 'width="' + tw + '" height="' + th + '"';
-    var shadow = !data.thumbnail_url.match(/.png$/i) ? ' shadow' : '';
-    var id = lurl.split('/').pop();
-    
-    var thumb = '<span class="stashthumb" id="'+id+'">' + anchor + '<img class="smaller thumb' + shadow + '"' +
-        dim + ' " alt="' + lurl + '" src="' + data.thumbnail_url_150 + '" />\
-        </a><a href="#toggle" class="button iconic plus" title="Larger"></a></span>';
-    
-    link.replaceWith(thumb);
+    link.replaceWith(item.html);
+    /*link.append('<a href="#toggle" class="button iconic plus" title="Larger"></a>');
     
     var lw = event.item.find('span#' + id);
     link = lw.find('a[href="' + lurl + '"]');
@@ -5546,13 +6222,94 @@ wsc.dAmn.chatterbox.Stash.render = function( event, link, data ) {
         return false;
     
     } );
-    
-    event.chan.st+= event.item.height();
-    event.chan.el.l.w.scrollTop( event.chan.st );
-    event.chan.scroll();
+    */
 
 };
-/**
+
+wsc.dAmn.tadpole.Stash = function( client, ui, api ) {
+
+    var init = function(  ) {
+    
+        ui.middle( 'ns.log', function( data, done ) {
+        
+            var linkso = $(data.content).find('a[href^="http://sta.sh"]');
+            
+            var links = [];
+            
+            linkso.each( function( index, item ) {
+            
+                links.push( $(item) );
+            
+            } );
+            
+            if( links.length == 0 )
+                return done( data );
+            
+            var next = function(  ) {
+                
+                if( links.length == 0 )
+                    return done( data );
+                
+                rlink( links.pop() );
+            
+            };
+            
+            var rlink = function( link ) {
+                
+                if( !link )
+                    return next();
+                
+                var url = link.prop('href');
+                var html = $('<span></span>').append(link).html();
+                
+                if( !url )
+                    return next();
+                
+                url = url.split('/');
+                var id = url[url.length - 1];
+                
+                wsc.dAmn.Stash.cache.get( id, function( item ) {
+                
+                    if( !item || !item.html )
+                        return next();
+                    
+                    data.content = replaceAll( data.content, html, item.html );
+                    next();
+                
+                } );
+            
+            };
+            
+            rlink( links.pop() );
+        
+        } );
+    
+    };
+    
+    init();
+
+};
+
+wsc.dAmn.tadpole.Stash.replace = function( data, link, stashdata, done ) {
+
+    if( 'error' in stashdata )
+        return done( data );
+    
+    if( stashdata.type != 'photo' )
+        return done( data );
+    
+    var url = 'http://sta.sh/' + link[1];
+    
+    data.content = replaceAll(
+        data.content,
+        link[0],
+        wsc.dAmn.Stash.item_html( url, stashdata )
+    );
+    
+    done( data );
+
+};
+;/**
  * Represents a string that possibly contains tablumps.
  * Use different object methods to render the tablumps differently.
  * 
@@ -5987,7 +6744,7 @@ wsc.dAmn.TablumpParser.prototype.renderOne = function( type, tag, tokens ) {
         return renderer.call(this, tokens);
 };
 
-
+;
 /**
  * Implements BDS Peer.
  * 
@@ -6139,7 +6896,7 @@ wsc.dAmn.BDS.Peer.chan = {};
 wsc.dAmn.BDS.Peer.chan.group = false;
 wsc.dAmn.BDS.Peer.chan.calls = [];
 
-/**
+;/**
  * Call object. Maybe a bit over the top here.
  * @class wsc.dAmn.BDS.Peer.Call
  * @constructor
@@ -6316,7 +7073,7 @@ wsc.dAmn.BDS.Peer.Call.prototype.remove = function( user ) {
 
 };
 
-/**
+;/**
  * lol
  *
  * Make a peer connection.
@@ -6665,7 +7422,7 @@ wsc.dAmn.BDS.Peer.Connection.prototype.persist = function(  ) {
         peer.create_offer();
     };
 
-};/**
+};;/**
  * This object represents a signalling channel used for transmitting connection data
  * between two peers.
  *
@@ -6841,7 +7598,7 @@ wsc.dAmn.BDS.Peer.SignalChannel.prototype.list = function( channel ) {
     this.client.npmsg( this.bds, 'BDS:PEER:LIST' + channel );
 
 };
-/**
+;/**
  * Signal handling class.
  *
  * Provides a collection of event handlers which allow the extension to respond to
@@ -7221,7 +7978,7 @@ wsc.dAmn.BDS.Peer.SignalHandler.prototype.close = function( event, client ) {
     });
 
 };
-/**
+;/**
  * webRTC objects
  */
 wsc.dAmn.BDS.Peer.RTC = {
@@ -7249,7 +8006,7 @@ if( window.RTCSessionDescription ) {
     wsc.dAmn.BDS.Peer.RTC.SessionDescription = RTCSessionDescription;
     wsc.dAmn.BDS.Peer.RTC.IceCandidate = RTCIceCandidate;
 
-}/**
+};/**
  * jQuery plugin.
  * 
  * Wrapper for implementing the plugin.

@@ -6,7 +6,7 @@
  * @submodule dAmn
  */
 wsc.dAmn = {};
-wsc.dAmn.VERSION = '0.10.36';
+wsc.dAmn.VERSION = '0.14.46';
 wsc.dAmn.STATE = 'alpha';
 
 
@@ -168,6 +168,18 @@ wsc.dAmn.chatterbox = function( ui ) {
      * @method Stash
      */
     wsc.dAmn.chatterbox.Stash( ui, settings );
+    
+    return settings;
+
+};
+
+
+wsc.dAmn.tadpole = function( client, ui ) {
+
+    var settings = {};
+    
+    wsc.dAmn.tadpole.Emotes( client, ui, settings );
+    wsc.dAmn.tadpole.Stash( client, ui, settings );
     
     return settings;
 

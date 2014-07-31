@@ -7,6 +7,12 @@ wsc.dAmn.wsc.Emotes = function( client, storage, settings ) {
     settings.emotes.fint = null;
     settings.emotes.fetching = false;
     settings.emotes.loaded = false;
+    settings.emotes.smap = {
+        'A': [], 'B': [], 'C': [], 'D': [], 'E': [], 'F': [], 'G': [],
+        'H': [], 'I': [], 'J': [], 'K': [], 'L': [], 'M': [], 'N': [],
+        'O': [], 'P': [], 'Q': [], 'R': [], 'S': [], 'T': [], 'U': [],
+        'V': [], 'W': [], 'X': [], 'Y': [], 'Z': [], '#': [], 
+    };
     
     settings.emotes.fetch = function(  ) {
         if( settings.emotes.loaded ) {
@@ -16,25 +22,59 @@ wsc.dAmn.wsc.Emotes = function( client, storage, settings ) {
         }
         settings.emotes.fetching = true;
         jQuery.getJSON('http://www.thezikes.org/publicemotes.php?format=jsonp&jsoncallback=?&' + (new Date()).getDay(), function(data){
+            console.log('>> fetching emote list.');
             settings.emotes.fetching = false;
             settings.emotes.emote = data;
+            settings.emotes.cache.update( data );
+            settings.emotes.sort();
             
             if( !settings.emotes.loaded ) {
                 if( settings.emotes.on ) {
                     client.trigger( 'dAmn.emotes.loaded', { name: 'dAmn.emotes.loaded' } );
                 }
+            } else {
+                client.trigger( 'dAmn.emotes.refreshed', { name: 'dAmn.emotes.refreshed' } );
             }
             
-            settings.emotes.sort();
             settings.emotes.loaded = true;
             //settings.emotes.picker.loaded();
-            settings.emotes.fint = setTimeout( settings.emotes.fetch, 3600000 );
+            //settings.emotes.fint = setTimeout( settings.emotes.fetch, 3600000 );
         },
         function(  ) {
             //settings.emotes.picker.loaded();
             return false;
         });
     };
+    
+    settings.emotes.receive = function(err, data){
+        if( err || Object.getOwnPropertyNames(data).length == 0 ) {
+            settings.emotes.fetch();
+            return;
+        }
+        
+        if( settings.emotes.fint ) {
+            clearTimeout( settings.emotes.fint );
+            settings.emotes.fint = null;
+        }
+        
+        settings.emotes.fetching = false;
+        settings.emotes.emote = data;
+        settings.emotes.sort();
+        
+        if( !settings.emotes.loaded ) {
+            if( settings.emotes.on ) {
+                client.trigger( 'dAmn.emotes.loaded', { name: 'dAmn.emotes.loaded' } );
+            }
+        } else {
+            client.trigger( 'dAmn.emotes.refreshed', { name: 'dAmn.emotes.refreshed' } );
+        }
+        
+        settings.emotes.loaded = true;
+        //settings.emotes.picker.loaded();
+        //settings.emotes.fint = setTimeout( settings.emotes.fetch, 3600000 );
+    };
+    
+    settings.emotes.cache = new wsc.dAmn.Emotes.Cache(settings.emotes.receive);
     
     settings.emotes.swap = function( data, done ) {
     
@@ -90,27 +130,30 @@ wsc.dAmn.wsc.Emotes = function( client, storage, settings ) {
     
     settings.emotes.sort = function(  ) {
     
-        var map = [
-            [], [], [], [], [], [], [],
-            [], [], [], [], [], [], [],
-            [], [], [], [], [], [], [],
-            [], [], [], [], [], [], 
-        ];
+        settings.emotes.smap = {
+            'A': [], 'B': [], 'C': [], 'D': [], 'E': [], 'F': [], 'G': [],
+            'H': [], 'I': [], 'J': [], 'K': [], 'L': [], 'M': [], 'N': [],
+            'O': [], 'P': [], 'Q': [], 'R': [], 'S': [], 'T': [], 'U': [],
+            'V': [], 'W': [], 'X': [], 'Y': [], 'Z': [], '#': [], 
+        };
+        
         var alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#';
         var emote = null;
+        var initial = '';
         var mitem = null;
         var prted = false;
         var idex = -1;
         var debug = true;
         
-        /*
-         * Until we have a better option...
         // First part we create our maps for our page items.
         for( var i in settings.emotes.emote ) {
+            
             if( !settings.emotes.emote.hasOwnProperty(i) )
                 continue;
             
             emote = settings.emotes.emote[i];
+            
+            /*
             var t = replaceAll(emote.img.split('/')
                 .pop().split('.').shift(),
                 '__', ' ');
@@ -132,22 +175,27 @@ wsc.dAmn.wsc.Emotes = function( client, storage, settings ) {
                 'title': 'created by ' + emote.by,
                 'html': true
             };
+            */
             
-            idex = alpha.indexOf( emote.code.substr(1, 1).toUpperCase() );
+            initial = emote.code[1].toUpperCase();
+            //idex = alpha.indexOf( emote.code.substr(1, 1).toUpperCase() );
+            idex = alpha.indexOf( initial );
             
-            if( idex == -1 )
+            if( idex == -1 ) {
                 idex = alpha.indexOf( '#' );
+                initial = '#'
+            }
             
-            map[idex].push(mitem);
+            settings.emotes.smap[initial].push(emote);
         }
         
         var sorter = function( a, b ) {
-            return caseInsensitiveSort( a.value, b.value );
+            return caseInsensitiveSort( a.code, b.code );
         };
         
-        var dp = settings.emotes.picker.page( '#' );
-        var page = null;
-        
+        //var dp = settings.emotes.picker.page( '#' );
+        //var page = null;
+        /*
         // Now we sort all of the emotes on each page.
         for( var i = 0; i < alpha.length; i++ ) {
             map[i].sort( sorter );
@@ -158,6 +206,16 @@ wsc.dAmn.wsc.Emotes = function( client, storage, settings ) {
         // Display the newly sorted emotes.
         settings.emotes.picker.refresh();
         */
+        
+        for( var init in settings.emotes.smap ) {
+        
+            if( !settings.emotes.smap.hasOwnProperty(init) )
+                continue;
+            
+            settings.emotes.smap[init].sort( sorter );
+        
+        }
+        
     
     };
     
@@ -174,10 +232,187 @@ wsc.dAmn.wsc.Emotes = function( client, storage, settings ) {
     
     if( !settings.emotes.on )
         return;
-    
-    settings.emotes.fetch();
 
 };
+
+
+/**
+ * Emoticon cache using IndexedDB.
+ * @class wsc.dAmn.Emotes.Cache
+ * @constructor
+ */
+wsc.dAmn.Emotes.Cache = function( onloaded ) {
+
+    this.idb = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+    this.idbt = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
+    this.idbkr = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
+    
+    this.db = null;
+    this.store = null;
+    this.loading = false;
+    this.loaded = false;
+    this.emotes = {};
+    this.onloaded = onloaded || function( err, data ) {};
+    
+    if( !this.idb )
+        return this.onloaded( true, {} );
+    
+    this.open();
+
+};
+
+/**
+ * Open our database.
+ * @method open
+ */
+wsc.dAmn.Emotes.Cache.prototype.open = function(  ) {
+
+    var cache = this;
+    var request = this.idb.open( 'wsc.dAmn.emote.cache', 1 );
+    
+    request.onerror = function( event ) {};
+    
+    request.onsuccess = function( event ) {
+    
+        cache.db = request.result;
+        cache.load();
+    
+    };
+    
+    
+    request.onupgradeneeded = function( event ) {
+    
+        cache.upgrade( event );
+        cache.loaded = true;
+        cache.onloaded( true, {} );
+    
+    };
+
+};
+
+/**
+ * Upgrade the database.
+ * @method upgrade
+ * @param event {Object} Upgrade needed event object.
+ */
+wsc.dAmn.Emotes.Cache.prototype.upgrade = function( event ) {
+
+    var db = event.target.result;
+    
+    this.store = db.createObjectStore( 'emotes', { keyPath: 'code' } );
+
+};
+
+/**
+ * Load the cache.
+ * @method load
+ */
+wsc.dAmn.Emotes.Cache.prototype.load = function(  ) {
+
+    if( this.loading )
+        return;
+    
+    var transaction = this.db.transaction('emotes');
+    var store = transaction.objectStore('emotes');
+    var cache = this;
+    this.loading = true;
+    
+    store.openCursor().onsuccess = function(event) {
+        
+        var cursor = event.target.result;
+        
+        if (cursor) {
+            cache.emotes[cursor.key] = cursor.value;
+            cursor.continue();
+            return;
+        }
+        
+        cache.loading = false;
+        cache.loaded = true;
+        cache.onloaded( false, cache.emotes );
+        
+    };
+
+};
+
+/**
+ * Update the cache.
+ * @method update
+ * @param emotes {Object} Emoticons to update or add.
+ */
+wsc.dAmn.Emotes.Cache.prototype.update = function( emotes ) {
+
+    var uplist = [];
+    var cache = this;
+    
+    for( var k in emotes ) {
+    
+        if( !emotes.hasOwnProperty(k) )
+            continue;
+        
+        this.emotes[k] = emotes[k];
+        uplist.push(emotes[k]);
+    
+    }
+    
+    var store = cache.db.transaction(["emotes"], "readwrite").objectStore("emotes");
+    
+    var update = function(  ) {
+    
+        if( uplist.length == 0 )
+            return;
+        
+        var emote = uplist.pop();
+        
+        var request = store.get(emote.code);
+        
+        request.onerror = function(event) {
+            
+            var request = store.add(emote);
+            
+            request.onerror = function(event) {
+                update();
+            };
+            
+            request.onsuccess = function(event) {
+                update();
+            };
+            
+        };
+        
+        request.onsuccess = function(event) {
+            
+            var data = request.result;
+            var preq = null
+            
+            if( data ) {
+                data.by = emote.by;
+                data.code = emote.code;
+                data.devid = emote.devid;
+                data.img = emote.img;
+                data.myvote = emote.myvote;
+                data.votes = emote.votes;
+                preq = store.put(data);
+            } else {
+                preq = store.add(emote);
+            }
+            
+            preq.onerror = function(event) {
+                update();
+            };
+            
+            preq.onsuccess = function(event) {
+                update();
+            };
+            
+        };
+    
+    };
+    
+    update();
+
+};
+
 
 wsc.dAmn.chatterbox.Emotes = function( client, ui, ext ) {
 
@@ -641,5 +876,255 @@ wsc.dAmn.Emotes.Page.prototype.refresh = function(  ) {
             'display': 'block'
         } );
     } );
+
+};
+
+
+wsc.dAmn.tadpole.Emotes = function( client, ui, settings ) {
+    
+    var pages = ui.menu.settings.page;
+    var cpages = ui.menu.commanditems;
+    var page = pages.add('emotes');
+    var view = page.overlay.view;
+    var api = {};
+    
+    // MENU BUTTONS
+    ui.menu.settings.add( 'emotes', 'CLOUD Emotes', function( event ) {
+    
+        pages.reveal('emotes');
+    
+    } );
+    
+    ui.menu.commands.add( 'emotes', 'emoteconfig', 'CLOUD Emotes', function( event ) {
+    
+        cpages.reveal('emotes');
+    
+    } );
+    
+    view.append('<nav class="emotes"><ul></ul></nav>');
+    
+    var ul = view.find('.emotes ul');
+    
+    // BACK BUTTON
+    new tadpole.MenuButton( ul, 'back', '', 'CLOUD Emotes', function( event ) {
+        page.overlay.hide();
+        page.hide();
+    }, 'left-open' );
+    
+    var emoteb = new tadpole.MenuButton( ul, 'toggle', '', 'Off', function( event ) {
+    
+        api.toggle();
+        client.ext.dAmn.save();
+        api.toggleb();
+    
+    }, 'cancel' );
+    
+    // RELOAD BUTTON
+    var loadb = new tadpole.MenuButton( ul, 'load', '', '', function( event ) {
+    
+        api.reload();
+    
+    } );
+    
+    loadb.button.append('<span class="label"></span><span class="faint">Loading... </span>');
+    var loadbll = loadb.button.find('.faint');
+    var loadbl = loadb.button.find('.label');
+    var emotes = [];
+    
+    // EMOTE LIST
+    /*var emulb = new tadpole.MenuButton( ul, 'eml', '', 'Emotes', function( event ) {} );
+    emulb.button.append('<ul class="emul"></ul>');
+    
+    var emul = emulb.button.find('ul.emul');*/
+    
+    api.toggleb = function(  ) {
+    
+        if( client.ext.dAmn.emotes.on ) {
+            emoteb.button.html(
+                '<span class="green icon-ok"></span>On <span class="faint">'
+                +'tap to turn off</span>'
+            );
+        } else {
+            emoteb.button.html(
+                '<span class="red icon-cancel"></span>Off <span class="faint">'
+                +'tap to turn on</span>'
+            );
+        }
+    
+    };
+    
+    api.toggle = function(  ) {
+    
+        var olds = client.ext.dAmn.emotes.on;
+        client.ext.dAmn.emotes.on = !olds;
+        
+        if( client.ext.dAmn.emotes.on ) {
+            api.reload();
+            return;
+        }
+    };
+    
+    api.loading = function(  ) {
+    
+        loadbl.text('');
+        loadbll.text('Refreshing...');
+    
+    };
+    
+    api.loaded = function(  ) {
+    
+        loadbl.text('Loaded ');
+        loadbll.text('refresh');
+        //api.update();
+    
+    };
+    
+    client.bind('dAmn.emotes.loaded', api.loaded);
+    client.bind('dAmn.emotes.refreshed', api.loaded);
+    
+    api.reload = function(  ) {
+    
+        if( client.ext.dAmn.emotes.fetching
+            || client.ext.dAmn.emotes.cache.loading )
+            return;
+        
+        api.loading();
+        client.ext.dAmn.emotes.fetch();
+    
+    };
+    
+    api.clear = function(  ) {
+    
+        while( emotes.length > 0 ) {
+        
+            emotes[i].remove();
+        
+        }
+    
+    };
+    
+    api.update = function(  ) {
+    
+        api.clear();
+        var edata = client.ext.dAmn.emotes.emote;
+        
+        for( var k in edata ) {
+        
+            if( !edata.hasOwnProperty(k) )
+                continue;
+            
+            var emote = new tadpole.MenuButton( emul, 'emote', edata[k].devid,
+                edata[k].code, function( event ) {
+                    var text = ui.control.get_text();
+                    
+                    control.set_text(
+                        text
+                        + ( text[text.length - 1] == ' ' ? '' : ' ' ) 
+                        + edata[k].code
+                    );
+                }
+            );
+            
+            // Add images to this bit?
+        
+        }
+    
+    };
+    
+    api.toggleb();
+    
+    wsc.dAmn.tadpole.EmotePicker( client, ui, settings );
+
+};
+
+
+wsc.dAmn.tadpole.EmotePicker = function( client, ui, settings ) {
+
+    var pages = ui.menu.settings.page;
+    var picker = ui.menu.commanditems.add( 'emotes' );
+    var view = picker.overlay.view;
+    var sub = {};
+    
+    view.append('<nav class="emotes"><ul></ul></nav>');
+    var ul = view.find( 'ul' );
+    
+    new tadpole.MenuButton( ul, 'back', '', 'CLOUD Emotes', function( event ) {
+        picker.overlay.hide();
+        picker.hide();
+    }, 'left-open' );
+    
+    var setup = function( initial ) {
+        
+        var selector = 'emotes-' + ( initial == '#' ? 'misc' : initial );
+        var page = pages.add(selector);
+        var items = [];
+        
+        new tadpole.MenuButton( ul, 'list', selector, 'List ' + initial, function( event ) {
+            pages.reveal(selector);
+            build();
+        });
+        
+        page.overlay.view.append('<nav class="emotelist"><ul></ul></nav>');
+        var emul = page.overlay.view.find('.emotelist ul');
+        
+        new tadpole.MenuButton( emul, 'title', '', 'Emotes "' + initial + '"',
+            function( event ) {
+                page.overlay.hide();
+                destroy();
+            }
+        );
+        
+        var build = function(  ) {
+        
+            for( var k in client.ext.dAmn.emotes.smap[initial] ) {
+            
+                var em = client.ext.dAmn.emotes.smap[initial][k];
+                
+                var item = new tadpole.MenuButton(
+                    emul, 'emote', em.devid, em.code,
+                    function( event ) {
+                        var text = ui.control.get_text();
+                        
+                        if( text.length > 0 ) {
+                            ui.control.set_text(
+                                text
+                                + ( text[text.length - 1] == ' ' ? '' : ' ' ) 
+                                + em.code
+                            );
+                            return;
+                        }
+                        
+                        ui.control.set_text(em.code);
+                    
+                    }
+                );
+                
+                items.push(item);
+            
+            }
+        
+        };
+        
+        var destroy = function(  ) {
+        
+            while( items.length > 0 ) {
+            
+                items.pop().remove();
+            
+            }
+        
+        };
+    
+    };
+    
+    for( var init in client.ext.dAmn.emotes.smap ) {
+    
+        if( !client.ext.dAmn.emotes.smap.hasOwnProperty(init) )
+            continue;
+        
+        setup(init);
+    
+    }
+    
 
 };
